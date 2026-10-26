@@ -10,6 +10,7 @@ import requests
 
 
 NOTION_API_URL = "https://api.notion.com/v1/pages/{page_id}"
+NOTION_DATA_SOURCE_QUERY_URL = "https://api.notion.com/v1/data_sources/{data_source_id}/query"
 NOTION_VERSION = "2026-03-11"
 GITHUB_API_URL = "https://api.github.com/repos/{repository}"
 ISSUE_REFERENCE_PATTERN = re.compile(r"(?<![\w/])#(\d+)\b")
@@ -27,6 +28,14 @@ def github_headers(github_token: str) -> dict[str, str]:
         "Accept": "application/vnd.github+json",
         "Authorization": f"Bearer {github_token}",
         "X-GitHub-Api-Version": "2022-11-28",
+    }
+
+
+def notion_headers(notion_token: str) -> dict[str, str]:
+    return {
+        "Authorization": f"Bearer {notion_token}",
+        "Notion-Version": NOTION_VERSION,
+        "Content-Type": "application/json",
     }
 
 
@@ -110,6 +119,48 @@ def push_activity(payload: dict[str, Any]) -> dict[str, str] | None:
     }
 
 
+def find_notion_project_page(
+    notion_token: str, data_source_id: str, repository_url: str
+) -> str:
+    response = requests.post(
+        NOTION_DATA_SOURCE_QUERY_URL.format(data_source_id=data_source_id),
+        headers=notion_headers(notion_token),
+        json={
+            "filter": {
+                "and": [
+                    {
+                        "property": "Repositório GitHub",
+                        "url": {"equals": repository_url},
+                    },
+                    {
+                        "property": "Automação ativa",
+                        "checkbox": {"equals": True},
+                    },
+                ]
+            },
+            "page_size": 2,
+        },
+        timeout=30,
+    )
+    response.raise_for_status()
+    results = response.json().get("results", [])
+
+    if not results:
+        raise RuntimeError(
+            "Nenhum projeto ativo no Notion corresponde ao repositório "
+            f"{repository_url}. Cadastre o repositório na base Projetos GitHub "
+            "e marque Automação ativa."
+        )
+
+    if len(results) > 1:
+        raise RuntimeError(
+            "Mais de um projeto ativo no Notion usa o mesmo repositório. "
+            "Deixe Automação ativa marcada em apenas um projeto."
+        )
+
+    return results[0]["id"]
+
+
 def rich_text_property(value: str) -> dict[str, Any]:
     return {
         "rich_text": [
@@ -155,11 +206,7 @@ def update_notion_page(
 ) -> None:
     response = requests.patch(
         NOTION_API_URL.format(page_id=notion_page_id),
-        headers={
-            "Authorization": f"Bearer {notion_token}",
-            "Notion-Version": NOTION_VERSION,
-            "Content-Type": "application/json",
-        },
+        headers=notion_headers(notion_token),
         json={"properties": properties},
         timeout=30,
     )
@@ -169,15 +216,20 @@ def update_notion_page(
 def main() -> int:
     try:
         notion_token = require_env("NOTION_TOKEN")
-        notion_page_id = require_env("NOTION_PAGE_ID")
+        notion_projects_data_source_id = require_env("NOTION_PROJECTS_DATA_SOURCE_ID")
         github_token = require_env("GH_TOKEN")
         repository = require_env("GITHUB_REPOSITORY")
         event_name = os.getenv("GITHUB_EVENT_NAME", "workflow_dispatch")
         event_payload = read_event_payload(os.getenv("GITHUB_EVENT_PATH"))
 
         repository_data = fetch_repository_metadata(repository, github_token)
-        activity = None
+        notion_page_id = find_notion_project_page(
+            notion_token,
+            notion_projects_data_source_id,
+            repository_data["html_url"],
+        )
 
+        activity = None
         if event_name == "push":
             activity = push_activity(event_payload)
         elif event_name == "workflow_dispatch":
@@ -193,6 +245,7 @@ def main() -> int:
         print("Sincronização GitHub → Notion concluída com sucesso.")
         print(f"Evento: {event_name}")
         print(f"Repositório: {repository_data['full_name']}")
+        print(f"Projeto Notion localizado: {notion_page_id}")
         print(f"Branch principal: {repository_data['default_branch']}")
 
         if activity:
