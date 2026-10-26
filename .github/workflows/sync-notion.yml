@@ -32,7 +32,7 @@ jobs:
       - name: Sync repository metadata to Notion
         env:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
-          NOTION_PAGE_ID: 405d29ad-970d-81d2-af0b-c49e61656999
+          NOTION_PROJECTS_DATA_SOURCE_ID: 7d628ab3-f724-43a2-a311-7af62ccff4af
           GH_TOKEN: ${{ github.token }}
           GITHUB_REPOSITORY: ${{ github.repository }}
         run: python src/sync_notion.py
