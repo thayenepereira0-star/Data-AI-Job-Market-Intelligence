@@ -73,12 +73,19 @@ Esperado, se nenhuma outra importação foi realizada: `127`.
 - A transformação mantém as regras de validação da DAI-23. Não inventa empresa nem habilidade.
 - O extrator CSV não é uma coleta automatizada online.
 - O loader PostgreSQL mantém gravações com transação e checagem de duplicação; o banco não é alterado durante testes unitários ou prévia.
-- Testes foram escritos no repositório, mas **não foram executados no computador da desenvolvedora**; confirmar resultados antes de mesclar o PR.
+- Os testes foram **executados no computador da desenvolvedora** em ambiente virtual Python: 4 testes aprovados em 0,108 s. A prévia também foi confirmada; o caminho de escrita da carga modular não foi reexecutado nesta tarefa.
 - A arquitetura dos módulos é preparada para extensões, sem afirmar que já existe agendamento, integração API, NLP ou ML.
 
 ## Critérios de aceite
 - [x] Código de extração, transformação e carga separado, com orquestrador preservado.
 - [x] Testes unitários e instruções preparados.
-- [ ] Testes unitários executados no ambiente local.
-- [ ] Prévia com mesmas contagens da DAI-23 confirmada.
-- [ ] PR revisado e incorporado após validação.
+- [x] Testes unitários executados no ambiente local (4/4 aprovados).
+- [x] Prévia com mesmas contagens da DAI-23 confirmada.
+- [x] Resultados de validação documentados; PR pronto para integração.
+
+## Evidências de validação local (desenvolvedora)
+
+- `python -m unittest discover -s tests -p "test_etl_v1.py" -v`: **4 testes passaram**, saída `Ran 4 tests in 0.108s — OK`.
+- `python -m src.database.migrate_v1` (sem `--apply`): **128 lidas, 127 válidas, 0 duplicatas no CSV, 1 rejeitada (linha 124, empresa ausente)**; prévia indicou **127 candidatas e nenhuma gravação**.
+- Consulta SQL no PostgreSQL: `SELECT COUNT(*) AS vagas FROM jobs;` retornou **127**.
+- Limitação de cobertura: a refatoração do módulo de **carga** ainda não foi testada por nova gravação nesta tarefa; preservação dos dados e prévia foram verificadas.
