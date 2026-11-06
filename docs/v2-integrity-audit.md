@@ -39,6 +39,22 @@ Get-Content -Raw .\sql\003_integrity_audit.sql | docker compose exec -T db psql 
 ## Done criteria
 
 - [x] Read-only audit SQL and interpretation guide versioned.
-- [ ] Run the SQL against local PostgreSQL and inspect the output.
-- [ ] Document observed anomalies and confirm expected constraints.
+- [x] Run the SQL against local PostgreSQL and inspect the output.
+- [x] Document observed anomalies and confirm expected constraints.
 - [ ] Review and merge the PR after validation.
+
+## Local audit results — 2026-11-06
+
+Evidence: successful PowerShell/psql output supplied by the developer (the assistant did not execute commands on the local PostgreSQL instance).
+
+- Row counts: companies 82; job_postings 127; job_skills 0; jobs 127; pipeline_runs 2; skills 0; sources 1.
+- Six declared foreign keys verified in `pg_constraint`.
+- Orphan/invalid references: all six checks returned **0**.
+- Exact duplicate groups by (source, external ID): **0**; by (source, original URL): **0**.
+- Duplicate normalized company and skill keys: **0** each.
+- Blank titles/company names/URLs, inverted salary ranges and inverted timestamps: all **0**.
+- Jobs with no publication: **0**.
+- Four expected unique indexes identified, including partial unique index for non-null external IDs.
+- Eight **groups of duplicate-looking jobs** (same company and exact title) were flagged for potential human review: BEES Intermediate Data Analyst (3); AB InBev Intermediate Data Analyst (2); AB InBev Intermediate Data Engineer (2); AB InBev Senior Data Analyst (2); AB InBev Senior Data Engineer (2); BEES Intermediate Data Engineer (2); BEES Senior Data Analyst (2); BEES Senior Data Engineer (2).
+
+**Interpretation:** these are not confirmed duplicates; identical company/title can represent distinct opportunities. Keep all until independent identifiers, description, time and location are reviewed. The empty `skills`/`job_skills` tables have not yet been tested with real records. The checks cover the specified structural rules, not comprehensive semantic data quality.
