@@ -21,7 +21,7 @@ Copy-Item .env.example .env
 3. Validar a configuração e iniciar somente o PostgreSQL:
 
 ```powershell
-docker compose config
+docker compose config --quiet
 docker compose up -d db
 docker compose ps
 ```
@@ -52,7 +52,8 @@ Os dados permanecem no volume Docker `postgres_data`. **Não use `docker compose
 
 - [x] Configuração versionada sem senha real.
 - [x] Procedimento de inicialização e teste documentado.
-- [ ] Docker Compose validado no computador de desenvolvimento.
-- [ ] Contêiner PostgreSQL em execução e consulta SQL de teste respondendo.
+- [x] Contêiner PostgreSQL em execução, confirmado como `running (healthy)` no computador de desenvolvimento.
+- [x] Consulta SQL de teste executada com resultado `current_database=jobmarket`, `current_user=jobmarket` e PostgreSQL 17.11.
+- [ ] Checagem explícita `docker compose config --quiet` ainda não documentada como executada.
 
-O último par de itens exige Docker no ambiente da pessoa desenvolvedora; não foi executado pelo assistente nesta etapa.
+A execução e a consulta foram verificadas em saídas de terminal enviadas pela desenvolvedora. O assistente não executou Docker diretamente.\n\n**Segurança:** use `docker compose config --quiet` em vez de `docker compose config` para evitar imprimir a senha do banco no terminal.
