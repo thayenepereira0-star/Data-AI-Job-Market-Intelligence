@@ -11,7 +11,6 @@ import sys
 
 from dotenv import load_dotenv
 import psycopg
-from psycopg.conninfo import make_conninfo
 
 
 def connection_settings() -> dict[str, str | int]:
