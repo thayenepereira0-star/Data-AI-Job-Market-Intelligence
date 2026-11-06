@@ -36,6 +36,22 @@ O arquivo usa `SELECT` e `\\echo` do psql para separar relatórios. Ele **não g
 ## Critérios de aceite
 
 - [x] Consultas SQL versionadas e documentadas.
-- [ ] Executar consultas no PostgreSQL local com sucesso.
-- [ ] Conferir contagens, vínculos e campos ausentes.
-- [ ] Registrar resultados reais e mesclar PR após validação.
+- [x] Executar consultas no PostgreSQL local com sucesso.
+- [x] Conferir contagens, vínculos e campos ausentes.
+- [x] Registrar resultados reais da execução local.
+- [ ] Mesclar PR após revisão.
+
+## Resultados da execução local (evidência fornecida em terminal)
+
+O script de oito blocos foi executado com sucesso em `psql` pela desenvolvedora.
+
+- Resumo: **127 vagas**, **127 publicações**, **82 empresas** e **1 fonte** (Adzuna).
+- Empresas mais frequentes: BEES (12), AB InBev (11), Jobgether (5), Decision group (3), DoorDash (3), Pavago (3), 3M (2), Azumo (2), BP (2), Banco Bradesco (2).
+- Distribuição mensal UTC 2026: janeiro 1, fevereiro 1, março 1, abril 2, maio 5, junho 4, julho 11, agosto 20, setembro 27, outubro 55 (soma 127).
+- Completude: 127 com descrição, 127 com data de publicação, 18 com tipo de contrato, 11 com algum salário, 0 com modalidade.
+- Títulos literais mais frequentes: Data Engineer (11), Senior Data Engineer (9), Data Scientist (8), Intermediate Data Analyst (5), Senior Data Analyst (5).
+- Fontes: Adzuna 127 publicações.
+- Integridade: 0 publicações sem vaga, 0 vagas sem empresa, 0 publicações sem fonte.
+- Execuções auditadas: dois registros `pipeline_runs`, com status `partial` (uma linha rejeitada em cada execução); uma execução importou 127 e a reexecução importou 0.
+
+**Cuidados:** mais vagas em outubro podem refletir a coleta, não crescimento do mercado; a classificação por título aqui é literal; os campos sem dados precisam de enriquecimento posterior. Textos acentuados apareceram com caracteres `??` no terminal Windows em um título do relatório; isso é sintoma de codificação de exibição e não comprova corrupção de dados.
