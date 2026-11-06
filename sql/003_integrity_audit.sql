@@ -17,7 +17,7 @@ SELECT conrelid::regclass AS from_table, conname AS constraint_name,
        confrelid::regclass AS to_table
 FROM pg_constraint
 WHERE contype = 'f' AND connamespace = 'public'::regnamespace
-ORDER BY from_table::text, constraint_name;
+ORDER BY conrelid::regclass::text, conname;
 
 \echo '3. Orphan records and unexpected missing links (expected zero)'
 SELECT
