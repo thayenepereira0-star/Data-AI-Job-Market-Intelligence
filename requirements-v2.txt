@@ -1,0 +1,4 @@
+# DAI-22: dependências adicionais para conexão Python -> PostgreSQL.
+# A v1 permanece com seu requirements.txt independente.
+psycopg[binary]>=3.2,<4
+python-dotenv>=1.0,<2
