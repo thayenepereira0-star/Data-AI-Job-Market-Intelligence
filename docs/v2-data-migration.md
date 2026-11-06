@@ -50,3 +50,7 @@ docker compose exec db psql -U jobmarket -d jobmarket -c "SELECT (SELECT count(*
 - [ ] Prévia executada e conferida no computador local.
 - [ ] Gravação real executada e contagens auditadas no PostgreSQL.
 - [ ] Reexecução sem inclusão de duplicatas comprovada.
+
+## Correção após primeiro teste de gravação
+
+A primeira execução local de `--apply` apresentou `IndeterminateDatatype` no PostgreSQL. A consulta de detecção de duplicados continha um parâmetro usado apenas em `IS NOT NULL`, sem contexto de tipo; o trecho foi substituído por uma comparação direta `external_job_id = %s`. A alteração é no código, sem mudança no esquema e sem exclusão de registros. É necessário atualizar a branch e repetir a prévia/gravação para validar a correção.
