@@ -166,9 +166,8 @@ def apply(records: list[Record], total: int, rejected_count: int) -> tuple[int, 
                 for record in records:
                     cur.execute(
                         "SELECT 1 FROM job_postings WHERE source_id = %s "
-                        "AND (original_url = %s OR "
-                        "(%s IS NOT NULL AND external_job_id = %s)) LIMIT 1",
-                        (source_id, record.url, record.external_id, record.external_id),
+                        "AND (original_url = %s OR external_job_id = %s) LIMIT 1",
+                        (source_id, record.url, record.external_id),
                     )
                     if cur.fetchone() is not None:
                         skipped += 1
