@@ -6,28 +6,11 @@ Uso, na raiz do projeto:
 
 from __future__ import annotations
 
-import os
 import sys
 
-from dotenv import load_dotenv
 import psycopg
 
-
-def connection_settings() -> dict[str, str | int]:
-    """Carrega somente parâmetros de conexão; a senha nunca é exibida."""
-    load_dotenv()
-    password = os.getenv("POSTGRES_PASSWORD")
-    if not password or password == "troque-por-uma-senha-local-forte":
-        raise ValueError("Defina uma POSTGRES_PASSWORD real no arquivo .env local.")
-
-    return {
-        "host": os.getenv("POSTGRES_HOST", "127.0.0.1"),
-        "port": int(os.getenv("POSTGRES_PORT", "5432")),
-        "dbname": os.getenv("POSTGRES_DB", "jobmarket"),
-        "user": os.getenv("POSTGRES_USER", "jobmarket"),
-        "password": password,
-        "connect_timeout": 5,
-    }
+from src.config import connection_settings
 
 
 def check_connection() -> tuple[str, str, int]:
