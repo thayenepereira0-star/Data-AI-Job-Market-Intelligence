@@ -47,7 +47,7 @@ docker compose exec db psql -U jobmarket -d jobmarket -c "SELECT count(*) AS tab
 
 - [x] SQL versionado para as sete tabelas e vínculos.
 - [x] Instruções de implantação e consultas de verificação documentadas.
-- [ ] Script executado no PostgreSQL local sem erros.
-- [ ] Sete tabelas e seus vínculos confirmados no servidor de desenvolvimento.
+- [x] Script executado no PostgreSQL local com `BEGIN`, sete `CREATE TABLE`, índices e `COMMIT`, sem erros relatados.
+- [x] Sete tabelas confirmadas por `\dt` e seis chaves estrangeiras confirmadas na consulta ao `information_schema` (evidências de terminal fornecidas pela desenvolvedora).
 
-Não foram realizados testes no computador da desenvolvedora pelo assistente.
+Testes executados pela desenvolvedora no PostgreSQL local; resultados enviados via capturas do terminal. O assistente não acessou ou executou comandos no computador dela.
