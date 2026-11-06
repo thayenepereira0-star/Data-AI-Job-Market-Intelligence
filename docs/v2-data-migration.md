@@ -47,10 +47,20 @@ docker compose exec db psql -U jobmarket -d jobmarket -c "SELECT (SELECT count(*
 - [x] Arquivo de migração versionado.
 - [x] Prévia sem escrita e tratamento de dados ausentes previstos.
 - [x] Deduplicação por fonte e identificador/URL prevista.
-- [ ] Prévia executada e conferida no computador local.
-- [ ] Gravação real executada e contagens auditadas no PostgreSQL.
-- [ ] Reexecução sem inclusão de duplicatas comprovada.
+- [x] Prévia executada e conferida no computador local.
+- [x] Gravação real executada e contagens auditadas no PostgreSQL.
+- [x] Reexecução sem inclusão de duplicatas comprovada.
 
 ## Correção após primeiro teste de gravação
 
 A primeira execução local de `--apply` apresentou `IndeterminateDatatype` no PostgreSQL. A consulta de detecção de duplicados continha um parâmetro usado apenas em `IS NOT NULL`, sem contexto de tipo; o trecho foi substituído por uma comparação direta `external_job_id = %s`. A alteração é no código, sem mudança no esquema e sem exclusão de registros. É necessário atualizar a branch e repetir a prévia/gravação para validar a correção.
+
+## Resultado da validação local — DAI-23
+
+- Prévia: 128 linhas lidas; 127 válidas; 0 duplicatas internas; 1 rejeitada (empresa ausente na linha 124).
+- Primeira gravação bem-sucedida: 127 importadas; 0 já existentes.
+- Consulta SQL de auditoria: 127 `jobs`, 127 `job_postings`, 82 `companies`, 1 `pipeline_runs` após a primeira gravação.
+- Reexecução idempotente: **0 importadas, 127 já existentes** (saída fornecida pela desenvolvedora).
+- A reexecução cria um novo registro de auditoria em `pipeline_runs`; portanto o número de execuções pode aumentar, sem duplicar vagas.
+- O registro incompleto continua no CSV, sem criação de uma empresa fictícia. O piloto manual de 3 vagas não integrou esta migração.
+- Evidências fornecidas pelo terminal da desenvolvedora, não por execução remota do assistente.
