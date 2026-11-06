@@ -44,4 +44,14 @@ O módulo usa `POSTGRES_HOST=127.0.0.1` por padrão, porque a porta do Compose f
 - Não cria nem altera tabelas, não importa vagas e não executa treinamento de IA.
 - Não considera os resultados de consulta como prova de que há dados nas tabelas.
 - Falhas de conexão exibem apenas o tipo de erro, sem mensagem detalhada que possa conter segredos.
-- Uma consulta bem-sucedida ainda precisa ser verificada no ambiente local da desenvolvedora para concluir DAI-22.
+- A desenvolvedora confirmou em conversa que a execução de `python -m src.database.check_connection` funcionou no computador local. A saída exata não foi fornecida; portanto os valores exibidos pelo script não foram comprovados em captura de terminal.
+
+## Validação realizada
+
+- [x] Branch e arquivos do módulo disponíveis localmente (captura de tela do VS Code).
+- [x] Ambiente virtual `(.venv)` ativado.
+- [x] `pip install -r requirements-v2.txt` concluído com sucesso (log fornecido).
+- [x] Execução do módulo Python informada como bem-sucedida pela desenvolvedora.
+- [ ] Registrar saída textual completa em futura conferência, se necessário para auditoria.
+
+**Escopo:** teste de conexão apenas, sem gravar dados.
