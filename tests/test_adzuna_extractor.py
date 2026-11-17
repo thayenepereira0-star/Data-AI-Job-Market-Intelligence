@@ -3,8 +3,8 @@ from __future__ import annotations
 
 import json
 from io import BytesIO
-from tempfile import TemporaryDirectory
 from pathlib import Path
+from tempfile import TemporaryDirectory
 import unittest
 from unittest.mock import patch
 from urllib.error import HTTPError
@@ -40,7 +40,10 @@ class AdzunaExtractorTest(unittest.TestCase):
                 "company": {"display_name": "Empresa Exemplo"},
             }],
         }
-        mock_urlopen.side_effect = [self.response(first), self.response({"count": 0, "results": []})]
+        mock_urlopen.side_effect = [
+            self.response(first),
+            self.response({"count": 0, "results": []}),
+        ]
 
         extraction = extract_jobs(
             what=" data analyst ",
@@ -113,10 +116,11 @@ class AdzunaExtractorTest(unittest.TestCase):
         with TemporaryDirectory() as temp_dir:
             output = Path(temp_dir) / "raw" / "jobs.json"
             write_raw_extraction(extraction, str(output))
-            saved = json.loads(output.read_text(encoding="utf-8"))
+            saved_text = output.read_text(encoding="utf-8")
+            saved = json.loads(saved_text)
 
         self.assertEqual(saved, extraction)
-        self.assertNotIn("app_key", output.read_text(encoding="utf-8"))
+        self.assertNotIn("app_key", saved_text)
 
 
 if __name__ == "__main__":
