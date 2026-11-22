@@ -10,6 +10,8 @@ on:
       - "src/run_v2.py"
       - "src/database/inspect_v2_db.py"
       - "tests/test_v2_quality.py"
+      - "src/database/history_profile.py"
+      - "tests/test_history_profile.py"
       - ".github/workflows/v2-quality-tests.yml"
 
 jobs:
