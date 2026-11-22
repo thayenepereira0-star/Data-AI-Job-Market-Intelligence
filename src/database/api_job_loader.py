@@ -13,6 +13,15 @@ import psycopg
 from src.config import connection_settings
 from src.processing.api_job_transform import NormalizedJob
 
+# Existing DAI-23 data uses the exact case-sensitive source name "Adzuna".
+# Reuse it to avoid importing the same source as a separate provider.
+SOURCE_DB_NAMES = {
+    "adzuna": "Adzuna",
+    "himalayas": "Himalayas",
+    "greenhouse": "Greenhouse",
+    "lever": "Lever",
+}
+
 BASE_URLS = {
     "adzuna": "https://www.adzuna.com.br",
     "himalayas": "https://himalayas.app",
@@ -66,7 +75,7 @@ def apply_incremental(
                         "INSERT INTO sources(name, base_url) VALUES (%s, %s) "
                         "ON CONFLICT (name) DO UPDATE SET name = EXCLUDED.name "
                         "RETURNING source_id",
-                        (record.source, BASE_URLS[record.source]),
+                        (SOURCE_DB_NAMES[record.source], BASE_URLS[record.source]),
                     )
                     source_ids[record.source] = cur.fetchone()[0]
                 source_id = source_ids[record.source]
