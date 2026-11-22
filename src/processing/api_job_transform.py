@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 from urllib.parse import urlsplit
 
@@ -36,7 +36,7 @@ def _date(value: Any) -> datetime | None:
     if isinstance(value, (float, int)):
         # API publication timestamps might be Unix milliseconds.
         seconds = value / 1000 if value > 100000000000 else value
-        return datetime.fromtimestamp(seconds, tz=__import__("datetime").timezone.utc)
+        return datetime.fromtimestamp(seconds, tz=timezone.utc)
     try:
         parsed = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
     except ValueError:
@@ -62,16 +62,16 @@ def _format(source: str, item: dict[str, Any], envelope: dict[str, Any]) -> dict
                     location=", ".join(map(str, item.get("locationRestrictions") or [])) if isinstance(item.get("locationRestrictions"), list) else None,
                     employment_type=item.get("employmentType"))
     if source == "greenhouse":
-        company = envelope.get("parameters", {}).get("board_token")
+        company = item.get("_origin_board") or envelope.get("parameters", {}).get("board_token")
         location = item.get("location") or {}
         return dict(title=item.get("title"), company=company,
                     url=item.get("absolute_url"), external_id=item.get("id"),
-                    description=item.get("content"), published_at=item.get("updated_at"),
+                    description=item.get("content"), published_at=None,  # Updated time is not necessarily publication time.
                     location=location.get("name") if isinstance(location, dict) else location,
                     employment_type=None)
     if source == "lever":
         cats = item.get("categories") or {}
-        return dict(title=item.get("text"), company=envelope.get("parameters", {}).get("site"),
+        return dict(title=item.get("text"), company=item.get("_origin_board") or envelope.get("parameters", {}).get("site"),
                     url=item.get("hostedUrl") or item.get("applyUrl"), external_id=item.get("id"),
                     description=item.get("descriptionPlain") or item.get("description"),
                     published_at=item.get("createdAt"),
@@ -120,10 +120,12 @@ def transform_envelope(envelope: dict[str, Any]) -> tuple[list[NormalizedJob], l
             continue
         external_id = _text(data.get("external_id"))
         signature = (source, external_id or url)
-        if signature in seen:
+        url_signature = (source, url)
+        if signature in seen or url_signature in seen:
             rejected.append({"index": index, "reason": "duplicado na coleta"})
             continue
         seen.add(signature)
+        seen.add(url_signature)
         valid.append(NormalizedJob(
             source=source, external_id=external_id, title=title,
             company=company, normalized_company=key(company), url=url,
