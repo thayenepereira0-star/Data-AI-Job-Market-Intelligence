@@ -12,7 +12,13 @@ from src.ingestion.orchestrator import persist_raw_results, run_sources
 
 
 def _combine_source_envelopes(source: str, envelopes: list[dict[str, Any]]) -> dict[str, Any]:
-    jobs = [job for envelope in envelopes for job in envelope.get("jobs", [])]
+    # Keep each career board's identity; combining lists must not erase provenance.
+    identifier = "board_token" if source == "greenhouse" else "site"
+    jobs = [
+        {**job, "_origin_board": envelope.get("parameters", {}).get(identifier)}
+        for envelope in envelopes
+        for job in envelope.get("jobs", [])
+    ]
     return {
         "source": source,
         "source_url": envelopes[0].get("source_url") if envelopes else None,
