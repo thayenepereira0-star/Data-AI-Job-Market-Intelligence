@@ -1,1 +1,11 @@
-.venv/\n.env\n.env.*\n!.env.example\n__pycache__/\n*.py[cod]\n.ipynb_checkpoints/\n.pytest_cache/\n.DS_Store\nThumbs.db\ndata/raw/himalayas_*.json\n
+.venv/
+.env
+.env.*
+!.env.example
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.pytest_cache/
+.DS_Store
+Thumbs.db
+data/raw/himalayas_*.json
