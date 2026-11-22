@@ -2,7 +2,7 @@
 import unittest
 from unittest.mock import patch
 
-from src.database.api_job_loader import apply_incremental, preview
+from src.database.api_job_loader import SOURCE_DB_NAMES, apply_incremental, preview
 from src.processing.api_job_transform import NormalizedJob
 
 
@@ -13,6 +13,9 @@ class LoaderSafetyTests(unittest.TestCase):
             company="Empresa Teste", normalized_company="empresa teste",
             url="https://example.org/jobs/1",
         )
+
+    def test_adzuna_preserves_existing_source_name(self):
+        self.assertEqual(SOURCE_DB_NAMES["adzuna"], "Adzuna")
 
     def test_preview_never_connects(self):
         with patch("src.database.api_job_loader.psycopg.connect") as connection:
