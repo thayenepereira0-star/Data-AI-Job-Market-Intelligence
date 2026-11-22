@@ -7,6 +7,7 @@ import sys
 from src.ingestion.himalayas_extractor import (
     HimalayasAPIError,
     extract_jobs,
+    remove_expired_jobs,
     write_raw_extraction,
 )
 
@@ -37,12 +38,13 @@ def main() -> int:
             seniority=args.seniority,
             employment_type=args.employment_type,
         )
+        extraction = remove_expired_jobs(extraction)
         write_raw_extraction(extraction, args.output)
     except (HimalayasAPIError, OSError, ValueError) as exc:
         print(f"Falha na extração Himalayas: {exc}", file=sys.stderr)
         return 1
 
-    print(f"Fonte: Himalayas")
+    print("Fonte: Himalayas")
     print(f"País solicitado: {extraction['parameters']['country']}")
     print(f"Página recebida: {extraction['parameters']['page']}")
     print(f"Anúncios efetivamente retornados: {extraction['result_count']}")
