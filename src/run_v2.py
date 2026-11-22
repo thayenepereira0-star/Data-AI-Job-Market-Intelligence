@@ -14,6 +14,7 @@ from src.ingestion.orchestrator import run_sources
 from src.ingestion.run_multisource import build_registry
 from src.processing.api_job_transform import transform_envelope
 from src.database.api_job_loader import apply_incremental
+from src.processing.v2_quality import analyze_quality
 
 SUPPORTED = frozenset({"adzuna", "himalayas", "greenhouse", "lever"})
 
@@ -23,6 +24,7 @@ def prepare_run(run: dict[str, Any]) -> tuple[dict[str, Any], dict[str, list[Any
     sources: list[dict[str, Any]] = []
     grouped: dict[str, list[Any]] = {}
     rejected_total = 0
+    rejected_by_source: dict[str, list[dict[str, Any]]] = {}
     for item in run["results"]:
         name = item["source"]
         if item["status"] != "success":
@@ -36,12 +38,14 @@ def prepare_run(run: dict[str, Any]) -> tuple[dict[str, Any], dict[str, list[Any
             continue
         grouped.setdefault(name, []).extend(valid)
         rejected_total += len(rejected)
+        rejected_by_source[name] = rejected
         sources.append({"source": name, "status": "success",
                         "fetched": item["result_count"],
                         "valid": len(valid), "rejected": len(rejected)})
     return {"run_id": run["run_id"], "sources": sources,
             "total_valid": sum(map(len, grouped.values())),
-            "total_rejected": rejected_total}, grouped
+            "total_rejected": rejected_total,
+            "quality": analyze_quality((job for records in grouped.values() for job in records), rejected_by_source)}, grouped
 
 
 def main(argv: list[str] | None = None) -> int:
