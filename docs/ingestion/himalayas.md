@@ -25,7 +25,7 @@ Himalayas permits personal and commercial API integrations without prior approva
 
 ## Tests and real-call distinction
 
-`tests/test_himalayas_extractor.py` uses mocked HTTP responses and makes no real API requests. No real-call count is reported by that suite. A real API query must be run separately in an environment with outbound access; record the actual response count and timestamp only after the response is observed.
+`tests/test_himalayas_extractor.py` uses mocked HTTP responses and makes no real API requests. A separate real GET was observed on 2026-11-22 at 17:56:27 UTC for `country=BR&q=data&page=1`: HTTP 200, 20 jobs returned on page 1. The API also returned `totalCount=1502`; the API documentation says that field is an estimate that can be up to a day old, so it is not a validated market total. The probe did not persist any job data.
 
 ## Official references
 
