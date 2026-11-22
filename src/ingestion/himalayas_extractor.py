@@ -114,6 +114,7 @@ def extract_jobs(
     payload = _request_json(params=params, timeout=timeout, api_key=key)
     return {
         "source": SOURCE,
+        "source_url": "https://himalayas.app",
         "extracted_at": _utc_now().isoformat(),
         "parameters": {
             "query": query.strip() if query and query.strip() else None,
@@ -138,20 +139,6 @@ def extract_jobs(
         "raw_response": payload,
         "result_count": len(payload["jobs"]),
     }
-
-
-def write_raw_extraction(extraction: dict[str, Any], output_path: str) -> None:
-    """Write a local raw snapshot; never include API credentials in the file."""
-    from pathlib import Path
-
-    if extraction.get("source") != SOURCE:
-        raise ValueError("O envelope não pertence à fonte Himalayas.")
-    path = Path(output_path)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        json.dumps(extraction, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-    )
 
 
 def remove_expired_jobs(
@@ -180,3 +167,17 @@ def remove_expired_jobs(
         raw["jobs"] = [job for job in raw["jobs"] if active(job)]
     cleaned["result_count"] = len(cleaned["jobs"])
     return cleaned
+
+
+def write_raw_extraction(extraction: dict[str, Any], output_path: str) -> None:
+    """Write a local raw snapshot; never include API credentials in the file."""
+    from pathlib import Path
+
+    if extraction.get("source") != SOURCE:
+        raise ValueError("O envelope não pertence à fonte Himalayas.")
+    path = Path(output_path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(extraction, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
