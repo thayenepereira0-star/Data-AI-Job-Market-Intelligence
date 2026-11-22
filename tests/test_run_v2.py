@@ -29,10 +29,12 @@ class V2IntegrationTests(unittest.TestCase):
                             "jobs": [{"id": 1, "title": "Developer",
                                       "absolute_url": "https://example.org/job"}]}}
         ]}
-        with patch("src.run_v2.build_registry", return_value={"greenhouse": object()}), \\
-             patch("src.run_v2.run_sources", return_value=fake_run), \\
-             patch("src.run_v2.apply_incremental") as loader, \\
-             patch("builtins.print"):
+        with (
+            patch("src.run_v2.build_registry", return_value={"greenhouse": object()}),
+            patch("src.run_v2.run_sources", return_value=fake_run),
+            patch("src.run_v2.apply_incremental") as loader,
+            patch("builtins.print"),
+        ):
             self.assertEqual(main(["--sources", "greenhouse", "--greenhouse-boards", "kunumi"]), 0)
             loader.assert_not_called()
 
